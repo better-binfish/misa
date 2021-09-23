@@ -1,0 +1,147 @@
+{
+	"header": {
+		"language": "en",
+		"country": "US",
+		"nativeName": "English",
+		"englishName": "English"
+	},
+	"data": {
+		"errors": {
+			"missingArgument": "Missing argument, the `{0}` argument is required!",
+			"missingPermission": "Missing permission, the `{0}` permission is required!",
+			"invalidProperty": "Invalid `{0}` provided, you must provide a valid {1}.",
+			"noChannelsWithNameOrId": "I found no channels with the name or ID of `{0}`.",
+			"noUsersWithNameOrId": "I found no users with the name or ID of `{0}`.",
+			"noRolesWithNameOrId": "I found no roles with the name or ID of `{0}`.",
+			"errorOccurredWhileLoading": "An error occurred while loading the {0}, please try again. If the problem continues, please report this to one of my developers on the [support server](https://discord.gg/eVCGeCP)"
+		},
+		"commands": {
+			"AvatarCommand": {
+				"description": "Get the profile picture of someone on the server by id, mention or your default."
+			},
+			"BanCommand": {
+				"description": "Ban or unban a group of identifiers for the guild.",
+				"listIsEmpty": "List is empty.",
+				"listHeader": "**List of banned users IDs from `:guildName`:**",
+				"failedToSaveOrUploadFile": "Failed to save/upload file.",
+				"failedToBanOrUnban": "Failed to `{0}` user with id `{1}`.",
+				"successToBanOrUnban": "**Successfully :action IDs:**"
+			},
+			"ChannelCommand": {
+				"description": "Get information about the channel by mention, identifier or name of channel.",
+				"embed" : {
+					"description": "**Name:** :name\n**ID:** :id\n**Category:** :category\n**Type:** :type\n**Creation Date:** :creationDate",
+					"additionalDescriptionTextChannel": "**Topic:** :topic\n**NSFW:** :isNsfw",
+					"additionalDescriptionVoiceChannel": "**Bitrate:** :bitRate\n**Limit:** :userLimit"
+				}
+			},
+			"ClearCommand": {
+				"description": "Deletes the specified number of messages.",
+				"tryingToExceedLimit": "You can delete strictly from `1` to `100` messages at a time.",
+				"success": "Successfully cleared `:countOfMessages` messages."
+			},
+			"EmojiCommand": {
+				"description": "Get information about the specified emoji by name or id, or a list of all custom emoji.",
+				"nameIsShort": "Emoji name cannot be less than 2 characters.",
+				"failedToFindEmoji": "Failed to find emoji with name or id `{0}`.",
+				"noEmojis": "There are no custom emojis on this server.",
+				"embed": {
+					"title": "List of all custom emojis from `:name`.",
+					"description": "**Name:** :name\n**ID:** :id\n**Animated:** :isAnimated\n**Image:** [Link](:url)\n**Creation Date:** :creationDate"
+				}
+			},
+			"FeedbackCommand": {
+				"description": "Send feedback about Misa back to the developers and the staff team.",
+				"invalidFeedbackChannel": "Invalid feedback channel defined, the text channel could not be found!",
+				"mustBe32CharactersOrMore": "The feedback message must be at least 32 characters long.",
+				"success": "Successfully sent feedback."
+			},
+
+			"HelpCommand": {
+				"description": "Provides a list of commands and what they do, and how you can use them.",
+				"failedToFindCommand": "Failed to find command with name of `{0}`.",
+				"embed": {
+					"menuDescription": "**» Help menu**\nWe have `:commandsCount` commands to explore.\nThe current prefix is `:prefix`.\n\n**» Commands list**\n:commands\n\n**» Useful links**\n:links",
+					"commandDescription": "**Name:** :name\n**Aliases:** :aliases\n**Description:** :description\n**Usage:** `:usage`\n**Required permissions:** :permissions"
+				}
+			},
+			"LanguageCommand": {
+				"description": "Show a list of available languages or set a language that should be used for the server.",
+				"invalidLanguageCode": "Invalid language code given, `{0}` is not a valid language code, or it is not yet supported.",
+				"changed": "The server's language has been successfully been updated to use the `:name` language!",
+				"embed": {
+					"title": "List of available languages.",
+					"fields": {
+						"usageField": {
+							"title": "To set the language."
+						},
+						"exampleField": {
+							"title": "Example of setting the language."
+						}
+					}
+				}
+			},
+			"LogChannelCommand": {
+				"description": "Set mention a text channel to logging in the mentioned channel.",
+				"changed": "The server's log channel id has been successfully been updated to `:name` channel!"
+			},
+			"PrefixCommand": {
+				"description": "Change the command prefix for the server.",
+				"invalidPrefix": "Invalid command prefix given, `{0}` is not a valid command prefix.",
+				"changed": "The server's command prefix has been successfully been updated to use the `:prefix` prefix!",
+				"embed": {
+					"description": "Use `:prefix` this is the current command prefix for this server." 
+				}
+			},
+			"RoleCommand": {
+				"description": "Get information about specified role by mention, identifier or name of role.",
+				"embed": {
+					"description": "**Name:** :name\n**ID:** :id\n**Color:** :color\n**Mentionable:** :mentionable\n**Permissions:** :permissions\n**Position:** :position\n**Creation Date:** :creationDate"
+				}
+			},
+			"ServerCommand": {
+				"description": "Get information about server.",
+				"embed": {
+					"description": "**Name:** :name\n**ID:** :id\n**Owner:** :owner\n**Member[:members]** | **Roles[:roles]** | **Channels[:channels]**\n**Verification:** :verification\n**Explicit Filter:** :filter\n**Boost Count:** :boostCount\n**Boost Tier:** :boostTier\n**Region:** :region\n**Creation Date:** :creationDate"
+				}
+			},
+			"ServerConfCommand": {
+				"description": "View configuration for server.",
+				"embed": {
+					"description": "Configuration for the **:name** guild:\n\n**Log Channel:** :channel\n**Language:** :lang\n**Prefix:** `:prefix`" 
+				}
+			},
+			"ShutdownCommand": {
+				"description": "Safely shuts off the bot."
+			},
+			"UserCommand": {
+				"description": "Get information about specified user by mention or identifier of user.",
+				"embed": {
+					"description": "**Name:** :name\n**ID:** :id\n**Nickname:** :nickname\n**Status:** :status\n**Owner:** :isOwner\n**Roles:** :roles\n**Join date:** :joinDate\n**Registration date:** :registrationDate"
+				}
+			}
+		},
+		"events": {
+			"GuildMemberJoinEvent": {
+				"embed": {
+					"description": ":inbox_tray: :mention (ID: `:id`)"
+				}
+			},
+			"GuildMemberLeaveEvent": {
+				"embed": {
+					"description": ":outbox_tray: **:tag** (ID: `:id`)"
+				}
+			},
+			"GuildBanEvent": {
+				"embed": {
+					"description": "Member **:tag** (ID: `:id`) has been banned.\nReason: :reason"
+				}
+			},
+			"GuildUnbanEvent": {
+				"embed": {
+					"description": "Member **:tag** (ID: `:id`) has been unbanned."
+				}
+			}
+		}
+	}
+}
