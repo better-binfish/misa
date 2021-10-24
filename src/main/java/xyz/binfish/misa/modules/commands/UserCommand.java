@@ -46,7 +46,7 @@ public class UserCommand extends Command {
 			}
 
 			if(user == null) {
-				return this.sendErrorMessage(message,
+				return this.sendError(message,
 						"data.errors.noUsersWithNameOrId", args[0]);
 			}
 

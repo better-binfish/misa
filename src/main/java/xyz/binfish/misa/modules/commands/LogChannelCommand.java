@@ -37,15 +37,15 @@ public class LogChannelCommand extends Command {
 	}
 
 	@Override
-	public boolean execute(String[] args, MessageChannel inputChannel, User author, Message message) {
+	public boolean execute(String[] args, MessageChannel channel, User author, Message message) {
 		GuildModel guildModel = GuildController.fetchGuild(message);
 		if(guildModel == null) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"data.errors.errorOccurredWhileLoading", "server settings");
 		}
 
 		if(args.length < 1) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"data.errors.missingArgument", "<channel_id | #channel> | disable");
 		}
 
@@ -53,13 +53,13 @@ public class LogChannelCommand extends Command {
 			return disableLogChannel(message);
 		}
 
-		GuildChannel channel = MentionableUtil.getChannel(message, args);
-		if(channel == null || !(channel instanceof TextChannel)) {
-			return this.sendErrorMessage(message,
+		GuildChannel gChannel = MentionableUtil.getChannel(message, args);
+		if(gChannel == null || !(gChannel instanceof TextChannel)) {
+			return this.sendError(message,
 					"data.errors.noChannelsWithNameOrId", args[0]);
 		}
 
-		return updateLogChannel(message, channel);
+		return updateLogChannel(message, gChannel);
 	}
 
 	private boolean disableLogChannel(Message message) {
@@ -76,27 +76,27 @@ public class LogChannelCommand extends Command {
 					String.format("Failed to disable the log channel for a server(%s), error: ",
 						message.getGuild().getId()) + e.getMessage());
 
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"Failed to disable the servers log channel settings, please try "
 					+ "again, if this problem persists, please contact one of the bot developers about it.");
 		}
 	}
 
-	private boolean updateLogChannel(Message message, GuildChannel channel) {
+	private boolean updateLogChannel(Message message, GuildChannel gChannel) {
 		try {
 			Misa.getDatabaseManager().newQueryBuilder(Constants.GUILD_TABLE_NAME)
 				.where("id", message.getGuild().getId())
-				.update(statement -> statement.set("log_channel_id", channel.getIdLong()));
+				.update(statement -> statement.set("log_channel_id", gChannel.getIdLong()));
 
 			this.sendSuccess(message, this.getString("changed")
-					.replace(":name", channel.getId()));
+					.replace(":name", gChannel.getId()));
 			return true;
 		} catch(SQLException e) {
 			Logger.getLogger().error(
 					String.format("Failed to update the log channel for a server(%s), error: ",
 						message.getGuild().getId()) + e.getMessage());
 
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"Failed to update the servers log channel settings, please try "
 					+ "again, if this problem persists, please contact one of the bot developers about it.");
 		}

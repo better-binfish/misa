@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import javax.security.auth.login.LoginException;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 
@@ -22,12 +23,16 @@ import xyz.binfish.misa.handler.listeners.ReadyListener;
 import xyz.binfish.misa.handler.listeners.MessageReceivedListener;
 import xyz.binfish.misa.handler.listeners.GuildListener;
 import xyz.binfish.misa.handler.listeners.MemberListener;
+import xyz.binfish.misa.handler.listeners.VerificationListener;
 
 import xyz.binfish.misa.database.DatabaseManager;
 import xyz.binfish.misa.database.Database;
 import xyz.binfish.misa.database.schema.Migration;
 
 import xyz.binfish.misa.locale.LanguageManager;
+import xyz.binfish.misa.cache.CacheManager;
+import xyz.binfish.misa.scheduler.ScheduleHandler;
+import xyz.binfish.misa.scheduler.Job;
 import xyz.binfish.misa.util.ClassLoaderUtil;
 
 import xyz.binfish.logger.Logger;
@@ -38,8 +43,9 @@ public class Misa {
 	private static Handler handler;
 	private static JDA jda;
 	private static DatabaseManager databaseManager;
+	private static CacheManager cacheManager;
 
-	private static final String VERSION = "0.1";
+	private static final String VERSION = "0.2";
 	private static boolean DEBUG_MODE;
 
 	private Misa() throws LoginException {
@@ -50,31 +56,60 @@ public class Misa {
 		// Logger creation
 		String pathToLogDirectory = config.get("defaultLogDirectory", "logs/");
 
+		try {
+			File logDirectory = new File(pathToLogDirectory);
+			if(!logDirectory.exists() && !logDirectory.mkdirs()) {
+				throw new IOException(
+						String.format("Failed to create directory for logs files by path: %s",
+							pathToLogDirectory)
+				);
+			}
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+
 		Logger logger = Logger.createLogger(
-			new LoggerConfig(
-				(pathToLogDirectory != null && new File(pathToLogDirectory).exists()
-				 ? pathToLogDirectory
-				 : null)).setUseColors(true)
+				new LoggerConfig(
+					(new File(pathToLogDirectory).exists()
+						? pathToLogDirectory
+						: null
+					)).setUseColors(true)
 		);
 
 		// Locale
 		logger.info("Upping language manager ...");
 		LanguageManager.up();
 
+		// Cache
+		logger.info("Creating cache manager ...");
+		cacheManager = new CacheManager();
+
+		// Jobs
+		logger.info("Registering jobs ...");
+		for(Class cls : ClassLoaderUtil.getInstance()
+				.getListClassesFromJar(Constants.PACKAGE_JOBS, new ArrayList<Class>())) {
+			try {
+				ScheduleHandler.registerJob((Job) cls.newInstance());
+			} catch(InstantiationException | IllegalAccessException e) {
+				logger.error("Failed registering job, error: " + e.getMessage());
+			}
+		}
+
+		logger.info(String.format("Registered %s jobs successfully.", ScheduleHandler.entrySet().size()));
+
 		// Database part
 		logger.info("Database manager initialization ...");
 		databaseManager = new DatabaseManager();
 
-		ArrayList<Class> classes = ClassLoaderUtil.getInstance()
-			.getListClassesFromJar(Constants.PACKAGE_MIGRATION, new ArrayList<Class>());
-
+		// Migrations
 		logger.info("Upping database migrations ...");
-		for(Class cls : classes) {
+		for(Class cls : ClassLoaderUtil.getInstance()
+				.getListClassesFromJar(Constants.PACKAGE_MIGRATION, new ArrayList<Class>())) {
 			try {
 				Migration mg = (Migration) cls.newInstance();
 				mg.up(databaseManager.getSchema());
 			} catch(InstantiationException | IllegalAccessException | java.sql.SQLException e) {
-				logger.error("Migration error: " + e.getMessage());
+				logger.error("Failed upping migration, error: " + e.getMessage());
 			}
 		}
 
@@ -107,7 +142,8 @@ public class Misa {
 						new ReadyListener(),
 						new MessageReceivedListener(handler),
 						new GuildListener(),
-						new MemberListener()
+						new MemberListener(),
+						new VerificationListener()
 				)
 				.build();
 
@@ -137,7 +173,11 @@ public class Misa {
 		return databaseManager;
 	}
 
-	public static boolean getDebugMode() {
+	public static CacheManager getCache() {
+		return cacheManager;
+	}
+
+	public static boolean makeDebug() {
 		return DEBUG_MODE;
 	}
 

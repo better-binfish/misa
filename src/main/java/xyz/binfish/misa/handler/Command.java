@@ -55,9 +55,11 @@ public abstract class Command {
 		return this.getClass().getSimpleName();
 	}
 
-	public boolean sendErrorMessage(Message context, String error) {
+	public boolean sendError(Message context, String error) {
 		if(!StringUtil.isLanguageString(error)) {
-			sendErrorMessageAndDeleteMessage(context, error);
+			this.sendResultEmbed(context, error, MessageType.ERROR);
+
+			return false;
 		}
 
 		String localizedError = langPackage.getString(error);
@@ -65,14 +67,17 @@ public abstract class Command {
 			error = localizedError;
 		}
 
-		return sendErrorMessageAndDeleteMessage(context, error);
+		this.sendResultEmbed(context, error, MessageType.ERROR);
+
+		return false;
 	}
 
-	public boolean sendErrorMessage(Message context, String error, Object... args) {
+	public boolean sendError(Message context, String error, Object... args) {
 		if(!StringUtil.isLanguageString(error)) {
-			sendErrorMessageAndDeleteMessage(context,
-					langPackage.format(error, args)
-			);
+			this.sendResultEmbed(context,
+					langPackage.format(error, args), MessageType.ERROR);
+
+			return false;
 		}
 
 		String localizedError = langPackage.getString(error, args);
@@ -80,13 +85,19 @@ public abstract class Command {
 			error = localizedError;
 		}
 
-		return sendErrorMessageAndDeleteMessage(context, error);
-	}
-
-	private boolean sendErrorMessageAndDeleteMessage(Message context, String message) {
-		this.sendResultEmbed(context, message, MessageType.ERROR);
+		this.sendResultEmbed(context, error, MessageType.ERROR);
 
 		return false;
+	}
+
+	public boolean sendWarning(Message context, String message) {
+		this.sendResultEmbed(context, message, MessageType.WARNING);
+
+		return false;
+	}
+
+	public void sendSuccess(Message context, String message) {
+		this.sendResultEmbed(context, message, MessageType.SUCCESS);
 	}
 
 	private void sendResultEmbed(Message context, String message, MessageType type) {
@@ -109,16 +120,6 @@ public abstract class Command {
 			.complete()
 			.delete()
 			.queueAfter(10, TimeUnit.SECONDS);
-	}
-
-	public boolean sendWarning(Message context, String message) {
-		this.sendResultEmbed(context, message, MessageType.WARNING);
-
-		return false;
-	}
-
-	public void sendSuccess(Message context, String message) {
-		this.sendResultEmbed(context, message, MessageType.SUCCESS);
 	}
 
 	public String getString(String path) {

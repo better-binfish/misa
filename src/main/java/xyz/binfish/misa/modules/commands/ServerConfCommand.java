@@ -36,7 +36,7 @@ public class ServerConfCommand extends Command {
 	public boolean execute(String[] args, MessageChannel channel, User author, Message message) {
 		GuildModel guildModel = GuildController.fetchGuild(message);
 		if(guildModel == null) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"data.errors.errorOccurredWhileLoading", "server settings");
 		}
 
@@ -50,11 +50,15 @@ public class ServerConfCommand extends Command {
 					.setDescription(
 						this.getString("embed.description")
 							.replace(":name", currentGuild.getName())
-							.replace(":channel", (logChannel != null
-									? String.format("%s (ID: `%s`)", logChannel.getName(), logChannel.getId())
-									: "None"))
 							.replace(":lang", langPackage.getNativeName())
 							.replace(":prefix", guildModel.getPrefix())
+							.replace(":verification", (guildModel.getVerifyRoleId() != 0
+									? "Enable\n" + this.getString("embed.verificationRoleNote")
+										.replace(":role", String.format("<@&%1$s> (ID: `%1$s`)", guildModel.getVerifyRoleId()))
+									: "Disable"))
+							.replace(":channel", (logChannel != null
+									? String.format("<#%1$s> (ID: `%1$s`)", logChannel.getId())
+									: "None"))
 					)
 					.setThumbnail(currentGuild.getIconUrl())
 					.build()

@@ -25,6 +25,7 @@ public class CreateGuildTableMigration implements Migration {
 			);
 			table.Long("log_channel_id").unsigned().nullable();
 			table.Long("auto_role_id").unsigned().nullable();
+			table.Long("verify_role_id").unsigned().nullable();
 			table.Boolean("is_premium").defaultValue(false);
 			table.Boolean("is_banned").defaultValue(false);
 			table.Timestamp();

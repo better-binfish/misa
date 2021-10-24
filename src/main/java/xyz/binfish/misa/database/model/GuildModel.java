@@ -16,7 +16,8 @@ public class GuildModel extends AbstractModel {
 
 	private long logChannelId;
 	private long autoRoleId;
-	
+	private long verifyRoleId;
+
 	private boolean isPremium = false;
 	private boolean isBanned = false;
 
@@ -42,6 +43,7 @@ public class GuildModel extends AbstractModel {
 
 			this.logChannelId = data.getLong("log_channel_id");
 			this.autoRoleId = data.getLong("auto_role_id");
+			this.verifyRoleId = data.getLong("verify_role_id");
 
 			this.isPremium = data.getBoolean("is_premium");
 			this.isBanned = data.getBoolean("is_banned");
@@ -112,6 +114,14 @@ public class GuildModel extends AbstractModel {
 
 	public void setAutoRoleId(long id) {
 		this.autoRoleId = id;
+	}
+
+	public long getVerifyRoleId() {
+		return verifyRoleId;
+	}
+
+	public void setVerifyRoleId(long id) {
+		this.verifyRoleId = id;
 	}
 
 	public boolean isPremium() {

@@ -92,7 +92,9 @@ public class Handler {
 	public void registerMessage(MessageReceivedEvent event) {
 		Message message = event.getMessage();
 
-		String prefix = GuildController.fetchGuild(message).getPrefix();
+		String prefix = (message.isFromGuild()
+				? GuildController.fetchGuild(message).getPrefix()
+				: Configuration.getInstance().get("defaultPrefix", "&"));
 		String contentRaw = message.getContentRaw();
 
 		if(!contentRaw.startsWith(prefix) && !contentRaw.startsWith(
@@ -141,7 +143,7 @@ public class Handler {
 		if(command.permissions != null) {
 			for(Permission prms : command.getRequiredPermissions()) {
 				if(!event.getMember().hasPermission(prms)) {
-					command.sendErrorMessage(event.getMessage(),
+					command.sendError(event.getMessage(),
 							"data.errors.missingPermission", prms.getName());
 					return;
 				}

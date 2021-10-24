@@ -43,7 +43,7 @@ public class ChannelCommand extends Command {
 		}
 
 		if(channel == null) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"data.errors.noChannelsWithNameOrId", args[0]);
 		}
 		

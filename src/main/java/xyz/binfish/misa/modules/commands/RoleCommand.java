@@ -37,7 +37,7 @@ public class RoleCommand extends Command {
 		Role role = null;
 
 		if(args.length < 1) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"data.errors.missingArgument", "<@role> | <role_id> | <role_name>");
 		}
 
@@ -56,7 +56,7 @@ public class RoleCommand extends Command {
 		}
 
 		if(role == null) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"data.errors.noRolesWithNameOrId", args[0]);
 		}
 

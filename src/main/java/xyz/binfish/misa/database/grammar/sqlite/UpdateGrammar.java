@@ -18,7 +18,7 @@ public class UpdateGrammar extends QueryGrammar {
 	public String format(QueryBuilder builder) {
 		query = "UPDATE ";
 
-		addPart(String.format(" %s SET", formatField(builder.getTable())));
+		addPart(String.format(" %s SET ", formatField(builder.getTable())));
 
 		buildKeyset(builder);
 

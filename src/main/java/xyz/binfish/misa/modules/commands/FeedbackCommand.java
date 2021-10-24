@@ -39,12 +39,12 @@ public class FeedbackCommand extends Command {
 		);
 
 		if(feedbackChannel == null) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					String.format("data.commands.%s.invalidFeedbackChannel", this.getClassName()));
 		}
 
 		if(args.length == 0) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"data.errors.missingArgument", "<message>");
 		}
 

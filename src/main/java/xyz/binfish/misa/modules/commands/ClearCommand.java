@@ -32,7 +32,7 @@ public class ClearCommand extends Command {
 	@Override
 	public boolean execute(String[] args, MessageChannel channel, User author, Message message) {
 		if(args.length < 1) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"data.errors.missingArgument", "<count_messages>");
 		}
 
@@ -41,7 +41,7 @@ public class ClearCommand extends Command {
 		try {
 			countOfMessages = Integer.parseInt(args[0]);
 		} catch(NumberFormatException e) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"data.errors.invalidProperty", args[0], "positive number");
 		}
 

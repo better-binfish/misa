@@ -46,11 +46,11 @@ public class BanCommand extends Command {
 		if(args.length > 0) {
 
 			// Argument tracking
-			switch(args[0].toLowerCase()) {
+			switch( args[0].toLowerCase() ) {
 				case "--unban":
 					isUnban = true;
 					break;
-				case "--getlist":
+				case "--get-list":
 					currentGuild.retrieveBanList().queue(bans -> {
 						if(bans.isEmpty()) {
 							this.sendWarning(message,
@@ -58,21 +58,16 @@ public class BanCommand extends Command {
 							return;
 						}
 
-						channel.sendMessage(
-								this.getString("listHeader")
-									.replace(":guildName", currentGuild.getName())
-						).queue();
+						channel.sendMessage(this.getString("listHeader")
+								.replace(":guildName", currentGuild.getName())).queue();
 
-						StringBuilder idsList = new StringBuilder()
-							.append("```\r\n");
+						StringBuilder idsList = new StringBuilder().append("```\r\n");
 
 						for(Ban ban : bans)
 							idsList.append(ban.getUser().getId() + "\r\n");
 						idsList.append("```");
 
-						int listLength = idsList.length();
-
-						if(listLength > 2000) {
+						if(idsList.length() > 2000) {
 							try {
 								File tmpFile = File.createTempFile("guild_" + currentGuild.getId() + "_bans_", ".txt");
 								FileOutputStream fos = new FileOutputStream(tmpFile);
@@ -80,7 +75,7 @@ public class BanCommand extends Command {
 								fos.write(idsList.toString().getBytes());
 								channel.sendFile(tmpFile).queue();
 							} catch(IOException e) {
-								this.sendErrorMessage(message, String.format(
+								this.sendError(message, String.format(
 									"data.commands.%s.failedToSaveOrUploadFile", this.getClassName())
 								);
 								return;
@@ -114,13 +109,12 @@ public class BanCommand extends Command {
 		}
 
 		if(ids.size() == 0) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"data.errors.missingArgument", "<user_id>");
 		}
 
 		StringBuilder success = new StringBuilder()
-			.append(
-				this.getString("successToBanOrUnban")
+			.append(this.getString("successToBanOrUnban")
 				.replace(":action", ((!isUnban) ? "blocked" : "unblocked")))
 			.append("\n```\n");
 
@@ -134,7 +128,7 @@ public class BanCommand extends Command {
 
 				success.append(String.format("%s\r\n", id));
 			} catch(Exception e) {
-				return this.sendErrorMessage(message,
+				return this.sendError(message,
 						String.format("data.commands.%s.failedToBanOrUnban", this.getClassName()),
 						((!isUnban) ? "ban" : "unban"), id);
 			}

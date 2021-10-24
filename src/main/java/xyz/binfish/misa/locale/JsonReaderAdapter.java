@@ -8,6 +8,8 @@ import javax.json.JsonObject;
 import java.text.MessageFormat;
 
 import xyz.binfish.misa.util.FileResourcesUtil;
+import xyz.binfish.misa.util.ComparatorUtil;
+import xyz.binfish.misa.util.NumberUtil;
 import xyz.binfish.logger.Logger;
 
 public class JsonReaderAdapter {
@@ -60,33 +62,43 @@ public class JsonReaderAdapter {
 	}
 
 	/*
-	 * Get a boolean as string value along the path to the key from a json file. If the
-	 * path is NULL then the method returns NULL.
+	 * Get a boolean value along the path to the key from a json file. If the
+	 * path or value is null then the method returns null.
 	 *
 	 * @param path the path to the required key, the value of which you want to get.
-	 * @return the boolean as string value of key.
+	 * @return the desired boolean value, or null if value not found.
 	 */
-	public String getBoolean(String path) {
+	public Boolean getBoolean(String path) {
 		if(path == null) {
 			return null;
 		}
 
-		return get(path);
+		String value = get(path);
+		if(value == null) {
+			return null;
+		}
+
+		return ComparatorUtil.getFuzzyType(value);
 	}
 
 	/*
-	 * Get a int as string value along the path to the key from a json file. If the
-	 * path is NULL then the method returns NULL.
+	 * Get a int value along the path to the key from a json file. If the
+	 * path or value is null then the method returns null.
 	 *
 	 * @param path the path to the required key, the value of which you want to get.
-	 * @return the int as string value of key.
+	 * @return the desired integer value, or null if value not found.
 	 */
-	public String getInt(String path) {
+	public Integer getInt(String path) {
 		if(path == null) {
 			return null;
 		}
 
-		return get(path);
+		String value = get(path);
+		if(value == null) {
+			return null;
+		}
+
+		return NumberUtil.parseInt(value);
 	}
 
 	/*

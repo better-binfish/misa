@@ -38,7 +38,7 @@ public class PrefixCommand extends Command {
 	public boolean execute(String[] args, MessageChannel channel, User author, Message message) {
 		GuildModel guildModel = GuildController.fetchGuild(message);
 		if(guildModel == null) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"data.errors.errorOccurredWhileLoading", "server settings");
 		}
 
@@ -56,7 +56,7 @@ public class PrefixCommand extends Command {
 
 		String prefix = args[0];
 		if(prefix.contains(" ") || prefix.length() < 1 || prefix.length() > 4) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					String.format("data.commands.%s.invalidPrefix", this.getClassName(), prefix));
 		}
 
@@ -75,7 +75,7 @@ public class PrefixCommand extends Command {
 					String.format("Failed to update the prefix for a server(%s), error: ",
 						message.getGuild().getId()) + e.getMessage());
 
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"Failed to update the servers prefix settings, please try "
 					+ "again, if this problem persists, please contact one of the bot developers about it.");
 		}

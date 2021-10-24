@@ -47,14 +47,14 @@ public class LanguageCommand extends Command {
 		LanguagePackage desiredPackage = LanguageManager.parse(args[0]);
 
 		if(desiredPackage == null) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					String.format("data.commands.%s.invalidLanguageCode", this.getClassName()),
 					args[0]);
 		}
 
 		GuildModel guildModel = GuildController.fetchGuild(message);
 		if(guildModel == null) {
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"data.errors.errorOccurredWhileLoading", "server settings");
 		}
 
@@ -72,7 +72,7 @@ public class LanguageCommand extends Command {
 					String.format("Failed to update the language for a server(%s), error: ",
 						message.getGuild().getId()) + e.getMessage());
 
-			return this.sendErrorMessage(message,
+			return this.sendError(message,
 					"Failed to update the servers language settings, please try "
 					+ "again, if this problem persists, please contact one of the bot developers about it.");
 		}
