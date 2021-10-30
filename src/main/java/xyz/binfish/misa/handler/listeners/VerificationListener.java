@@ -1,54 +1,52 @@
 package xyz.binfish.misa.handler.listeners;
 
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdatePendingEvent;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.EmbedBuilder;
 
 import xyz.binfish.misa.handler.Listener;
 import xyz.binfish.misa.database.model.GuildModel;
 import xyz.binfish.misa.database.controllers.GuildController;
-import xyz.binfish.misa.locale.LanguageManager;
-import xyz.binfish.misa.locale.LanguagePackage;
 import xyz.binfish.misa.util.MessageType;
-import xyz.binfish.misa.Misa;
+import xyz.binfish.logger.Logger;
 
 public class VerificationListener extends Listener {
 
 	@Override
-	public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
-		if(event.getAuthor().isBot()) {
+	public void onGuildMemberUpdatePending(GuildMemberUpdatePendingEvent event) {
+		Guild guild = event.getGuild();
+		GuildModel guildModel = GuildController.fetchGuild(guild);
+		if(guildModel == null) {
+			Logger.getLogger().error("An error occurred while loading the server settings, in VerificationListener#onGuildMemberUpdatePending");
 			return;
 		}
 
-		if(Misa.getCache().has("verify_" + event.getAuthor().getId())) {
-			String[] values = ((String) Misa.getCache().get("verify_" + event.getAuthor().getId())).split(":");
-			Misa.getCache().forget("verify_" + event.getAuthor().getId());
+		if(event.getOldPending() && !(guildModel.getVerifyRoleId() == 0)) {
+			Role verifyRole = guild.getRoleById(guildModel.getVerifyRoleId());
+			if(verifyRole == null) {
 
-			if(values[0].equals(event.getMessage().getContentRaw())) {
-				Guild verifyGuild = Misa.getJDA().getGuildById(values[1]);
-				LanguagePackage langPackage = LanguageManager.getLocale(verifyGuild);
-
-				GuildModel guildModel = GuildController.fetchGuild(verifyGuild);
-				if(guildModel == null) {
-					event.getMessage().getChannel().sendMessage(
-							langPackage.getString("data.errors.errorOccurredWhileLoading", "server settings")).queue();
-					return;
+				TextChannel channel = event.getGuild().getTextChannelById(guildModel.getLogChannelId());
+				if(channel != null) {
+					channel.sendMessage(
+							new EmbedBuilder()
+								.setColor(MessageType.WARNING.getColor())
+								.setDescription(String.format("Role for verification not found and not added to user %s (ID: `%s`)",
+										event.getUser().getAsMention(), event.getUser().getId()))
+								.build()).queue();
 				}
-
-				Role verifyRole = verifyGuild.getRoleById(guildModel.getVerifyRoleId());
-				if(verifyRole == null) {
-					event.getMessage().getChannel().sendMessage(
-							langPackage.getString("data.errors.noRolesWithNameOrId",
-								String.valueOf(guildModel.getVerifyRoleId()))
-					).queue();
-					return;
-				}
-
-				verifyGuild.addRoleToMember(event.getAuthor().getIdLong(), verifyRole).queue();
-			} else {
-				event.getMessage().getChannel().sendMessage("Invalid code, please try again.").queue();
 				return;
 			}
+
+			if(event.getMember().getRoles().stream()
+					.filter(role -> role.getIdLong() == verifyRole.getIdLong())
+					.findFirst()
+					.orElse(null) != null) {
+				return;
+			}
+
+			guild.addRoleToMember(event.getUser().getIdLong(), verifyRole).queue();
 		}
 	}
 }

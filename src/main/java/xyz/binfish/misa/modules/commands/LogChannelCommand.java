@@ -24,7 +24,7 @@ public class LogChannelCommand extends Command {
 		super();
 		this.name = "setlog";
 		this.aliases = null;
-		this.usage = "setlog (channel_id | #channel) | disable";
+		this.usage = "setlog <channel_id | #channel> | disable";
 		this.guildOnly = true;
 		this.permissions = new Permission[]{
 			Permission.ADMINISTRATOR

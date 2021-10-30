@@ -4,7 +4,6 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 
 import java.sql.SQLException;
@@ -13,27 +12,27 @@ import xyz.binfish.misa.handler.Command;
 import xyz.binfish.misa.database.model.GuildModel;
 import xyz.binfish.misa.database.controllers.GuildController;
 import xyz.binfish.misa.util.ComparatorUtil;
-import xyz.binfish.misa.util.StringUtil;
-import xyz.binfish.misa.util.RandomUtil;
-import xyz.binfish.misa.util.MessageType;
+import xyz.binfish.misa.util.MentionableUtil;
 import xyz.binfish.misa.Misa;
 import xyz.binfish.misa.Constants;
 import xyz.binfish.logger.Logger;
 
-public class VerificationCommand extends Command {
+public class VerificationRoleCommand extends Command {
 
-	public VerificationCommand() {
+	public VerificationRoleCommand() {
 		super();
-		this.name = "verify";
+		this.name = "setverify";
 		this.aliases = null;
-		this.usage = "verify [disable]";
+		this.usage = "setverify <role_id | @role> | disable";
 		this.guildOnly = true;
-		// Permission.ADMINISTRATOR for all flags.
+		this.permissions = new Permission[] {
+			Permission.ADMINISTRATOR
+		};
 	}
 
 	@Override
 	public String getDescription() {
-		return "This will send you some info about verification.";
+		return "Set the verification role for the membership screening.";
 	}
 
 	@Override
@@ -44,69 +43,22 @@ public class VerificationCommand extends Command {
 					"data.errors.errorOccurredWhileLoading", "server settings");
 		}
 
-		message.delete().queue();
-
-		if(args.length > 0) {
-
-			if(!message.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-				return this.sendError(message,
-						"data.errors.missingPermission", Permission.ADMINISTRATOR.getName());
-			}
-
-			if(ComparatorUtil.isFuzzyFalse(args[0])) {
-				return disableVerify(message);
-			}
-
-			switch( args[0].toLowerCase() ) {
-				case "--set-role":
-					if(args.length == 1 || !StringUtil.isIdentifier(args[1])) {
-						return this.sendError(message,
-								"data.errors.missingArgument", "<role_id>");
-					}
-
-					Role verifyRole = message.getGuild().getRoleById(args[1]);
-					if(verifyRole == null) {
-						return this.sendError(message,
-								"data.errors.noRolesWithNameOrId", args[1]);
-					}
-
-					return updateVerifyRole(message, verifyRole);
-				default:
-					return false;
-			}
-		}
-
-		if(guildModel.getVerifyRoleId() == 0) {
+		if(args.length < 1) {
 			return this.sendError(message,
-					String.format("data.commands.%s.isDisabled", this.getClassName()));
+					"data.errors.missingArgument", "<role_id | @role> | disable");
 		}
 
-		Role verifyRole = message.getGuild().getRoleById(guildModel.getVerifyRoleId());
+		if(ComparatorUtil.isFuzzyFalse(args[0])) {
+			return disableVerify(message);
+		}
+
+		Role verifyRole = MentionableUtil.getRole(message, args);
 		if(verifyRole == null) {
-			return false;
+			return this.sendError(message,
+					"data.errors.noRolesWithNameOrId", args[0]);
 		}
 
-		if(message.getGuild().getMemberById(author.getIdLong()).getRoles().stream()
-					.filter(role -> role.getIdLong() == verifyRole.getIdLong())
-					.findFirst()
-					.orElse(null) != null) {
-			return this.sendWarning(message, this.getString("alreadyVerified"));
-		}
-
-		String code = RandomUtil.generateString(6) ;
-		Misa.getCache().put("verify_" + author.getId(),
-				String.format("%s:%s", code, message.getGuild().getId()), 60 * 2);
-
-		author.openPrivateChannel().queue(pc -> pc.sendMessage(
-					new EmbedBuilder()
-						.setColor(MessageType.INFO.getColor())
-						.setDescription(
-							this.getString("embed.description")
-								.replace(":code", code)
-						).build()).queue()
-		);
-
-		return true;
+		return updateVerifyRole(message, verifyRole);
 	}
 
 	private boolean disableVerify(Message message) {

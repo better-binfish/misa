@@ -37,7 +37,6 @@ public class ChannelCommand extends Command {
 
 		if(args.length > 0) {
 			channel = MentionableUtil.getChannel(message, args);
-
 		} else {
 			channel = currentGuild.getTextChannelById(messageChannel.getIdLong());
 		}

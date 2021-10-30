@@ -26,7 +26,7 @@ public class UserCommand extends Command {
 		this.name = "user";
 		this.aliases = null;
 		this.usage = "user [@member] | [user_id]";
-		this.guildOnly = false;
+		this.guildOnly = true;
 	}
 
 	@Override
@@ -39,18 +39,19 @@ public class UserCommand extends Command {
 		Member member = message.getMember();
 
 		if(args.length > 0) {
-			User user = null;
 
 			if(MentionableUtil.isMentionUser(args)) {
-				user = MentionableUtil.getUser(message, args);
+				member = message.getGuild().getMember(
+						MentionableUtil.getUser(message, args)
+				);
+			} else {
+				member = message.getGuild().getMemberById(args[0]);
 			}
+		}
 
-			if(user == null) {
-				return this.sendError(message,
-						"data.errors.noUsersWithNameOrId", args[0]);
-			}
-
-			member = message.getGuild().getMember(user);
+		if(member == null) {
+			return this.sendError(message,
+					"data.errors.noUsersWithNameOrId", args[0]);
 		}
 
 		if(!member.getUser().isBot()) {

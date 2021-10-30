@@ -121,14 +121,9 @@
 					"description": "**Name:** :name\n**ID:** :id\n**Nickname:** :nickname\n**Status:** :status\n**Owner:** :isOwner\n**Roles:** :roles\n**Join date:** :joinDate\n**Registration date:** :registrationDate"
 				}
 			},
-			"VerificationCommand": {
-				"description": "This will send you some info about verification.",
-				"changed": "This server's verification role id has been successfully been updated to `:id` id!",
-				"isDisabled": "Verification on this server is disabled.",
-				"alreadyVerified": "You are already verified.",
-				"embed": {
-					"description": "To confirm verification, please send this code `:code` to this private channel."
-				}
+			"VerificationRoleCommand": {
+				"description": "Set the verification role for the membership screening.",
+				"changed": "This server's verification role id has been successfully been updated to `:id` id."
 			}
 		},
 		"events": {

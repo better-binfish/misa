@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.Role;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -156,6 +157,46 @@ public class MentionableUtil {
 			}
 
 			return context.getGuild().getVoiceChannelById(part);
+		}
+
+		return null;
+	}
+
+	/*
+	 * Get the first role object matching in the given message context and arguments.
+	 *
+	 * @param context the message object.
+	 * @param args    the argument parsed to the command.
+	 * @return the first channel matching the given argument or null.
+	 */
+	public static Role getRole(Message context, String[] args) {
+		return getRole(context, args, 0);
+	}
+
+	/*
+	 * Get the N index role object matching in the given message context and arguments.
+	 *
+	 * @param context the message object.
+	 * @param args    the arguments parsed to the command.
+	 * @param index   the index of the argument that should be checked.
+	 * @return the role matching the given index or null.
+	 */
+	public static Role getRole(Message context, String[] args, int index) {
+		if(!context.getMentionedRoles().isEmpty()) {
+			return context.getMentionedRoles().get(0);
+		}
+
+		if(args.length <= index) {
+			return null;
+		}
+
+		String part = args[index].trim();
+
+		if(NumberUtil.isNumeric(part)) {
+			Role role = context.getGuild().getRoleById(part);
+			if(role != null) {
+				return role;
+			}
 		}
 
 		return null;
