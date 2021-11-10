@@ -39,6 +39,7 @@ public class Handler {
 
 		for(Class cls : classes) {
 			try {
+				if(cls.isSynthetic()) continue;
 				Constructor<Command> constructCommand = cls.getConstructor();
 				this.loadCommand(constructCommand.newInstance());
 			} catch(NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -98,7 +99,7 @@ public class Handler {
 		String contentRaw = message.getContentRaw();
 
 		if(!contentRaw.startsWith(prefix) && !contentRaw.startsWith(
-					String.format("<@%s>", Misa.getJDA().getSelfUser().getId()))) {
+					String.format("<@%s>", Misa.getSelfUser().getId()))) {
 			return;
 		}
 

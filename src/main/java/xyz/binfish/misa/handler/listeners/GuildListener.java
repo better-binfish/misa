@@ -16,6 +16,7 @@ import xyz.binfish.misa.Constants;
 import xyz.binfish.misa.Misa;
 import xyz.binfish.misa.Configuration;
 import xyz.binfish.misa.util.MessageType;
+import xyz.binfish.misa.util.StringUtil;
 
 public class GuildListener extends Listener {
 
@@ -37,7 +38,7 @@ public class GuildListener extends Listener {
 	
 		// metric
 
-		TextChannel channel = Misa.getJDA().getTextChannelById(
+		TextChannel channel = Misa.getShardManager().getTextChannelById(
 				Configuration.getInstance().get("activityLogChannelId", null)
 		);
 
@@ -75,7 +76,7 @@ public class GuildListener extends Listener {
 
 		// metric
 
-		TextChannel channel = Misa.getJDA().getTextChannelById(
+		TextChannel channel = Misa.getShardManager().getTextChannelById(
 				Configuration.getInstance().get("activityLogChannelId", null)
 		);
 

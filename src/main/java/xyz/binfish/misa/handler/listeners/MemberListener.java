@@ -2,6 +2,7 @@ package xyz.binfish.misa.handler.listeners;
 
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberLeaveEvent;
+import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMuteEvent;
 import net.dv8tion.jda.api.events.guild.GuildBanEvent;
 import net.dv8tion.jda.api.events.guild.GuildUnbanEvent;
@@ -16,6 +17,7 @@ import xyz.binfish.misa.database.controllers.GuildController;
 import xyz.binfish.misa.database.model.GuildModel;
 import xyz.binfish.misa.util.MessageType;
 import xyz.binfish.misa.locale.LanguageManager;
+import xyz.binfish.misa.locale.LanguagePackage;
 
 public class MemberListener extends Listener {
 
@@ -73,6 +75,53 @@ public class MemberListener extends Listener {
 					.build()
 			).queue();
 		});
+	}
+
+	@Override
+	public void onGuildMemberUpdateNickname(GuildMemberUpdateNicknameEvent event) {
+		GuildModel guildModel = GuildController.fetchGuild(event.getGuild());
+		if(guildModel == null) {
+			return;
+		}
+
+		TextChannel channel = event.getGuild().getTextChannelById(guildModel.getLogChannelId());
+		if(channel == null) {
+			return;
+		}
+
+		if(event.getNewNickname() == null) {
+			return;
+		}
+
+		LanguagePackage langPackage = LanguageManager.getLocale(guildModel);
+		if(event.getOldNickname() != null) {
+			channel.sendMessage(
+				new EmbedBuilder()
+					.setColor(MessageType.INFO.getColor())
+					.setDescription(langPackage.getString("data.events.GuildMemberUpdateNicknameEvent.embed.update")
+							.replace(":tag", event.getUser().getAsTag())
+							.replace(":id", event.getUser().getId())
+							.replace(":from", event.getOldNickname())
+							.replace(":to", event.getNewNickname())
+					)
+					.setFooter(langPackage.getString("data.events.GuildMemberUpdateNicknameEvent.embed.updateFooter"))
+					.setTimestamp(LocalDateTime.now())
+					.build()
+			).queue();
+		} else {
+			channel.sendMessage(
+				new EmbedBuilder()
+					.setColor(MessageType.INFO.getColor())
+					.setDescription(langPackage.getString("data.events.GuildMemberUpdateNicknameEvent.embed.set")
+							.replace(":tag", event.getUser().getAsTag())
+							.replace(":id", event.getUser().getId())
+							.replace(":to", event.getNewNickname())
+					)
+					.setFooter(langPackage.getString("data.events.GuildMemberUpdateNicknameEvent.embed.setFooter"))
+					.setTimestamp(LocalDateTime.now())
+					.build()
+			).queue();
+		}
 	}
 
 	@Override

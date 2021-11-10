@@ -26,7 +26,7 @@ public class DatabaseManager {
 
 	public static boolean debugMode =
 		(Configuration.getInstance().is("databaseDebugMode", false) ||
-		Misa.makeDebug() ? true : false);
+		Misa.getSettings().useDebugging() ? true : false);
 
 	public DatabaseManager() {
 		this.schema = new Schema(this);

@@ -57,4 +57,17 @@ public class NumberUtil {
 	public static boolean isNumeric(@Nonnull String string) {
 		return NUMBER_PATTERN.matcher(string).matches();
 	}
+
+	/*
+	 * Parses the given number, making sure the number is greater than
+	 * the minimum number given, and less than the max number given.
+	 *
+	 * @param number the number that should be parsed.
+	 * @param min    the max value number can be.
+	 * @param max    the minimum value the number can be.
+	 * @return get the number that is greater that the minimum and less than the maximum.
+	 */
+	public static int getBetween(int number, int min, int max) {
+		return Math.min(max, Math.max(min, number));
+	}
 }

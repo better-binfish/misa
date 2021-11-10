@@ -13,6 +13,7 @@ import xyz.binfish.misa.database.controllers.GuildController;
 import xyz.binfish.misa.database.model.GuildModel;
 import xyz.binfish.misa.util.MessageType;
 import xyz.binfish.misa.Misa;
+import xyz.binfish.misa.AppInfo;
 import xyz.binfish.misa.Constants;
 import xyz.binfish.misa.Configuration;
 
@@ -56,7 +57,7 @@ public class HelpCommand extends Command {
 							.replace(":commands", commandsList)
 							.replace(":links", "[Website](#) | [Support](" + Constants.SUPPORT_SERVER + ")")
 				)
-				.setFooter("Misa version " + Misa.getVersion());
+				.setFooter("Misa version " + AppInfo.getAppInfo().version);
 		} else {
 			Command command = Misa.getHandler().getCommand(args[0]);
 

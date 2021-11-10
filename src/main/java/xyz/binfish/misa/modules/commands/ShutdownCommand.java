@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.entities.User;
 
 import xyz.binfish.misa.handler.Command;
 import xyz.binfish.misa.Misa;
-import xyz.binfish.logger.Logger;
 
 public class ShutdownCommand extends Command {
 
@@ -24,12 +23,9 @@ public class ShutdownCommand extends Command {
 		return "Safely shuts off the bot.";
 	}
 
+	@Override
 	public boolean execute(String[] args, MessageChannel channel, User author, Message message) {
-		Logger.getLogger().info("Shutting down");
-		Logger.getLogger().closeLogger();
-
-		Misa.getJDA().shutdown();
-
+		Misa.shutdown();
 		return true;
 	}
 }

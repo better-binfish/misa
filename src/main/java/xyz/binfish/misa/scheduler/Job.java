@@ -94,7 +94,7 @@ public abstract class Job extends TimerTask {
 	protected void handleTask(Task... tasks) {
 		for(Task task : tasks) {
 			try {
-				if(Misa.makeDebug()) {
+				if(Misa.getSettings().useDebugging()) {
 					Logger.getLogger().debug(String.format("Invoking %s#handle", task.getClass().getName()));
 				}
 				task.handle();

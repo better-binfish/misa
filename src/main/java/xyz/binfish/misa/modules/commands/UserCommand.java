@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Activity.ActivityType;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 
 import java.util.List;
 import java.util.Iterator;
@@ -18,6 +19,7 @@ import xyz.binfish.misa.handler.Command;
 import xyz.binfish.misa.util.DateFormatter;
 import xyz.binfish.misa.util.StringUtil;
 import xyz.binfish.misa.util.MentionableUtil;
+import xyz.binfish.misa.Constants;
 
 public class UserCommand extends Command {
 
@@ -64,7 +66,7 @@ public class UserCommand extends Command {
 							.replace(":name", member.getUser().getAsTag())
 							.replace(":id", member.getId())
 							.replace(":nickname", (member.getNickname() != null ? member.getNickname() : "None"))
-							.replace(":status", StringUtil.capitalizeOnlyFirstChar(member.getOnlineStatus().toString()))
+							.replace(":status", formatOnlineStatus(member.getOnlineStatus()))
 							.replace(":isOwner", (member.isOwner() ? "Yes" : "No"))
 							.replace(":roles", (member.getRoles().size() == 0) ? "None" : member.getRoles().stream()
 								.map(Role::getName)
@@ -111,6 +113,22 @@ public class UserCommand extends Command {
 		}
 
 		return true;
+	}
+
+	private String formatOnlineStatus(OnlineStatus status) {
+		String icon;
+		if(status == OnlineStatus.ONLINE) {
+			icon = Constants.EMOJI_ONLINE;
+		} else if(status == OnlineStatus.IDLE) {
+			icon = Constants.EMOJI_IDLE;
+		} else if(status == OnlineStatus.DO_NOT_DISTURB) {
+			icon = Constants.EMOJI_DND;
+		} else {
+			icon = Constants.EMOJI_OFFLINE;
+		}
+
+		return String.format("%s %s", icon, StringUtil
+				.capitalizeOnlyFirstChar(status.toString().replace("_", " ")));
 	}
 
 	private Color getRoleColor(List<Role> roles) {

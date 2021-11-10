@@ -1,19 +1,21 @@
 package xyz.binfish.misa;
 
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.SelfUser;
 
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
+import net.dv8tion.jda.api.sharding.ShardManager;
+import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
+
 import javax.security.auth.login.LoginException;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 
@@ -36,45 +38,20 @@ import xyz.binfish.misa.scheduler.Job;
 import xyz.binfish.misa.util.ClassLoaderUtil;
 
 import xyz.binfish.logger.Logger;
-import xyz.binfish.logger.LoggerConfig;
 
 public class Misa {
 
 	private static Handler handler;
-	private static JDA jda;
 	private static DatabaseManager databaseManager;
 	private static CacheManager cacheManager;
+	private static Settings settings;
+	private static ShardManager shardManager;
 
-	private static final String VERSION = "0.2";
-	private static boolean DEBUG_MODE;
+	public Misa(Settings settings, Configuration config) throws LoginException {
+		this.settings = settings;
 
-	private Misa() throws LoginException {
-
-		// Init config
-		Configuration config = Configuration.getInstance();
-
-		// Logger creation
-		String pathToLogDirectory = config.get("defaultLogDirectory", "logs/");
-
-		try {
-			File logDirectory = new File(pathToLogDirectory);
-			if(!logDirectory.exists() && !logDirectory.mkdirs()) {
-				throw new IOException(
-						String.format("Failed to create directory for logs files by path: %s",
-							pathToLogDirectory)
-				);
-			}
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-
-		Logger logger = Logger.createLogger(
-				new LoggerConfig(
-					(new File(pathToLogDirectory).exists()
-						? pathToLogDirectory
-						: null
-					)).setUseColors(true)
-		);
+		Logger logger = Logger.getLogger();
+		logger.log(getVersionInfo());
 
 		// Locale
 		logger.info("Upping language manager ...");
@@ -118,55 +95,27 @@ public class Misa {
 		handler.load(Constants.PACKAGE_MODULES + ".commands");
 
 		try {
-			jda = JDABuilder.createDefault(config.get("token", null))
-				.setStatus(OnlineStatus.ONLINE)
-				.setActivity(Activity.watching(config.get("activityText", null)))
-				.setMemberCachePolicy(MemberCachePolicy.ALL)
-				.setChunkingFilter(ChunkingFilter.NONE)
-				.enableIntents(EnumSet.of(
-							GatewayIntent.GUILD_MEMBERS,
-							GatewayIntent.GUILD_BANS,
-							GatewayIntent.GUILD_EMOJIS,
-							GatewayIntent.GUILD_INVITES,
-							GatewayIntent.GUILD_MESSAGES,
-							GatewayIntent.GUILD_MESSAGE_REACTIONS,
-							GatewayIntent.GUILD_VOICE_STATES,
-							GatewayIntent.GUILD_PRESENCES,
-							GatewayIntent.DIRECT_MESSAGES)
-				)
-				.enableCache(EnumSet.of(
-							CacheFlag.ACTIVITY,
-							CacheFlag.CLIENT_STATUS)
-				)
-				.addEventListeners(
-						new ReadyListener(),
-						new MessageReceivedListener(handler),
-						new GuildListener(),
-						new MemberListener(),
-						new VerificationListener()
-				)
-				.build();
-
-			jda.awaitReady();
-		} catch(InterruptedException e) {
-			logger.error("Something went wrong while building JDA!", e);
+			shardManager = buildShardManager(config);
+		} catch(LoginException e) {
+			logger.error("Something went wrong while building ShardManager!", e);
 		}
-	}
-
-	public static void main(String[] args) throws LoginException {
-		if(args.length > 0) {
-			DEBUG_MODE = (args[0].equals("debugMode=true") ? true : false);
-		}
-
-		new Misa();
 	}
 
 	public static Handler getHandler() {
 		return handler;
 	}
 
-	public static JDA getJDA() {
-		return jda;
+	public static ShardManager getShardManager() {
+		return shardManager;
+	}
+
+	public static SelfUser getSelfUser() {
+		for(JDA shard : getShardManager().getShards()) {
+			if(shard.getStatus().equals(JDA.Status.CONNECTED)) {
+				return shard.getSelfUser();
+			}
+		}
+		return null;
 	}
 
 	public static DatabaseManager getDatabaseManager() {
@@ -177,11 +126,80 @@ public class Misa {
 		return cacheManager;
 	}
 
-	public static boolean makeDebug() {
-		return DEBUG_MODE;
+	public static Settings getSettings() {
+		return settings;
 	}
 
-	public static String getVersion() {
-		return VERSION;
+	public static void shutdown() {
+		Logger logger = Logger.getLogger();
+		logger.info("Shutting down.");
+
+		if(getShardManager() != null) {
+			for(JDA shard : getShardManager().getShards()) {
+				shard.shutdown();
+			}
+		}
+
+		try {
+			getDatabaseManager().getDatabase().close();
+		} catch(java.sql.SQLException e) {
+			logger.error("Failed to close database connection during shutdown: ", e);
+		}
+
+		logger.closeLogger();
+		System.exit(0);
+	}
+
+	private String getVersionInfo() {
+		return new String("\n" +
+				"'||    ||'  ||\n" +
+				" |||  |||  ...   ....   ....\n" +
+				" |'|..'||   ||  ||. '  '' .||\n" +
+				" | '|' ||   ||  . '|.. .|' ||\n" +
+				".|. | .||. .||. |'..|' '|..'|'\n" +
+				""
+				+ "\n\tVersion: " + AppInfo.getAppInfo().version
+				+ "\n\tJVM:     " + System.getProperty("java.version")
+				+ "\n\tJDA:     " + JDAInfo.VERSION
+				+ "\n"
+		);
+	}
+
+	private ShardManager buildShardManager(Configuration config) throws LoginException {
+		DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.create(EnumSet.of(
+				GatewayIntent.GUILD_MEMBERS,
+				GatewayIntent.GUILD_BANS,
+				GatewayIntent.GUILD_EMOJIS,
+				GatewayIntent.GUILD_INVITES,
+				GatewayIntent.GUILD_MESSAGES,
+				GatewayIntent.GUILD_MESSAGE_REACTIONS,
+				GatewayIntent.GUILD_VOICE_STATES,
+				GatewayIntent.GUILD_PRESENCES,
+				GatewayIntent.DIRECT_MESSAGES)
+			)
+			.setToken(config.get("token", null))
+			.setStatus(OnlineStatus.ONLINE)
+			.setActivity(Activity.watching(config.get("activityText", null)))
+			.setMemberCachePolicy(MemberCachePolicy.ALL)
+			.setChunkingFilter(ChunkingFilter.NONE)
+			.enableCache(EnumSet.of(
+					CacheFlag.ACTIVITY,
+					CacheFlag.CLIENT_STATUS)
+			)
+			.setShardsTotal(settings.getShardCount());
+
+		if(settings.getShards() != null) {
+			builder.setShards(settings.getShards());
+		}
+
+		builder.addEventListeners(
+			new ReadyListener(),
+			new MessageReceivedListener(getHandler()),
+			new GuildListener(),
+			new MemberListener(),
+			new VerificationListener()
+		);
+
+		return builder.build();
 	}
 }

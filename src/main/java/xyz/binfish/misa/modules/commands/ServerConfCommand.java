@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 
@@ -41,8 +41,9 @@ public class ServerConfCommand extends Command {
 		}
 
 		Guild currentGuild = message.getGuild();
-		GuildChannel logChannel = Misa.getJDA()
-			.getGuildChannelById(guildModel.getLogChannelId());
+		TextChannel logChannel = (guildModel.getLogChannelId() != 0
+				? currentGuild.getTextChannelById(guildModel.getLogChannelId())
+				: null);
 
 		channel.sendMessage(
 				new EmbedBuilder()

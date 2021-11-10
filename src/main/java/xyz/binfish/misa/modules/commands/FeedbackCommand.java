@@ -34,7 +34,7 @@ public class FeedbackCommand extends Command {
 
 	@Override
 	public boolean execute(String[] args, MessageChannel channel, User author, Message message) {
-		TextChannel feedbackChannel = Misa.getJDA().getTextChannelById(
+		TextChannel feedbackChannel = Misa.getShardManager().getTextChannelById(
 			Configuration.getInstance().get("feedbackChannelId", null)
 		);
 

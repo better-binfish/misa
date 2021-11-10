@@ -82,6 +82,7 @@ public class BanCommand extends Command {
 							}
 						} else {
 							channel.sendMessage(idsList).queue();
+							return;
 						}
 					});
 					break;

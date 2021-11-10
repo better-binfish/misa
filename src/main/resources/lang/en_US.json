@@ -85,6 +85,25 @@
 				"description": "Set mention a text channel to logging in the mentioned channel.",
 				"changed": "The server's log channel id has been successfully been updated to `:name` channel!"
 			},
+			"PingCommand": {
+				"description": "Shows the current ping.",
+				"embed": {
+					"description": "Pong. Time taken `:ping` (:rating)\nWebsocket heartbeat `:heartbeat` ms"
+				},
+				"rating": {
+					"10": "very fast like Sonic! :smiley_cat:",
+					"100": "great!",
+					"200": "nice!",
+					"300": "decent.",
+					"400": "average...",
+					"700": "slow...",
+					"800": "too slow.",
+					"900": "bad",
+					"1600": "#BlameDiscord.",
+					"10000": "it become not usable #BlameDiscord.",
+					"other": "slow af."
+				}
+			},
 			"PrefixCommand": {
 				"description": "Change the command prefix for the server.",
 				"invalidPrefix": "Invalid command prefix given, `{0}` is not a valid command prefix.",
@@ -112,6 +131,9 @@
 					"verificationRoleNote": "**Verification Role:** :role"
 				}
 			},
+			"ShardCommand": {
+				"description": "Get inforamtion about bot shards."
+			},
 			"ShutdownCommand": {
 				"description": "Safely shuts off the bot."
 			},
@@ -135,6 +157,14 @@
 			"GuildMemberLeaveEvent": {
 				"embed": {
 					"description": ":outbox_tray: **:tag** (ID: `:id`)"
+				}
+			},
+			"GuildMemberUpdateNicknameEvent": {
+				"embed": {
+					"set": "Member **:tag** (ID: `:id`) set nickname to `:to`.",
+					"update": "Member **:tag** (ID: `:id`) updated nickname from `:from` to `:to`.",
+					"setFooter": "Member Set up Nickname",
+					"updateFooter": "Member Update Nickname"
 				}
 			},
 			"GuildBanEvent": {
